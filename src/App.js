@@ -1,41 +1,28 @@
 import React, { Component } from 'react';
-
+import { Provider }   from 'react-redux';   
 import './App.css';
-import axios from 'axios';
+
 import Products from './components/Products';
 import Filter from './components/Filter';
 import Basket from './components/Basket';
+import store from './store';
+
 
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = { products: [], filteredProducts: [], cartItems: [] };
-    this.handleChangeSort = this.handleChangeSort.bind(this);
-    this.handleChangeSize = this.handleChangeSize.bind(this);
+    this.state = { products: [], filteredProducts: [], cartItems: [] };    
     this.handleAddToCart = this.handleAddToCart.bind(this);
     this.handleRemoveFromCart = this.handleRemoveFromCart.bind(this);
   }
 
-  componentDidMount () {
-    axios.get('https://myblog-9cad3.firebaseio.com/db.json').then(response => this.setState({
-      products: response.data.products,
-      filteredProducts: response.data.products
-    }));    
-
+  componentDidMount () {       
     if(localStorage.getItem('cartItems')) {
       this.setState({cartItems: JSON.parse(localStorage.getItem('cartItems')) });
     }
   }
 
-  handleChangeSort (e) {
-    this.setState({sort: e.target.value});
-    this.listProducts();
-  }
-
-  handleChangeSize (e) {    
-    this.setState({size: e.target.value});
-    this.listProducts();
-  }
+ 
 
   handleAddToCart(e,product) {
     this.setState(
@@ -65,29 +52,10 @@ class App extends Component {
     });
   }
 
-  listProducts () {
-    this.setState(state => {
-      
-      if(state.sort!=='') {       
-        state.products.sort((a,b) => 
-          (          
-            state.sort === 'lowest'? (a.price > b.price?1:-1) : (a.price < b.price?1:-1)            
-        ));
-      }
-      else {        
-        state.products.sort((a,b) => (a.id > b.id ?1:-1));
-      } 
-     
-      if(state.size!= undefined && state.size !== '') { 
-        return {filteredProducts: state.products.filter(a =>
-          a.availableSizes.indexOf(state.size)>=0
-          )}
-      }
-      return {filteredProducts: state.products};
-    });
-  }
-  render() {
+  
+  render() {    
     return (
+      <Provider store={store}>
       <div className="container">
        <h1>Shopping Cart</h1>
        <hr/>
@@ -106,6 +74,7 @@ class App extends Component {
          </div>
        </div>
       </div>
+      </Provider>
     );
   }
 }
